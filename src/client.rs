@@ -29,7 +29,7 @@ mod encryption {
         match mode {
             Mode::Plain => Ok(StreamSwitcher::Plain(stream)),
             Mode::Tls => {
-                let connector = TlsConnector::builder().build()?;
+                let connector = TlsConnector::builder().danger_accept_invalid_certs(true).build()?;
                 connector
                     .connect(domain, stream)
                     .map_err(|e| match e {
@@ -43,6 +43,37 @@ mod encryption {
         }
     }
 }
+
+// #[cfg(feature = "rusttls-tls")]
+// mod encryption {
+//     pub use rustls::Stream;
+//     use std::net::TcpStream;
+//
+//     pub use crate::stream::Stream as StreamSwitcher;
+//     /// TCP stream switcher (plain/TLS).
+//     pub type AutoStream = StreamSwitcher<TcpStream, Stream>;
+//
+//     use crate::error::Result;
+//     use crate::stream::Mode;
+//
+//     pub fn wrap_stream(stream: TcpStream, domain: &str, mode: Mode) -> Result<AutoStream> {
+//         match mode {
+//             Mode::Plain => Ok(StreamSwitcher::Plain(stream)),
+//             Mode::Tls => {
+//                 let connector = TlsConnector::builder().build()?;
+//                 connector
+//                     .connect(domain, stream)
+//                     .map_err(|e| match e {
+//                         TlsHandshakeError::Failure(f) => f.into(),
+//                         TlsHandshakeError::WouldBlock(_) => {
+//                             panic!("Bug: TLS handshake not blocked")
+//                         }
+//                     })
+//                     .map(StreamSwitcher::Tls)
+//             }
+//         }
+//     }
+// }
 
 #[cfg(not(feature = "tls"))]
 mod encryption {
