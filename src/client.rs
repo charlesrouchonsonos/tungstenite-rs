@@ -164,6 +164,7 @@ fn connect_to_some(addrs: &[SocketAddr], uri: &Uri, mode: Mode) -> Result<AutoSt
     for addr in addrs {
         debug!("Trying to contact {} at {}...", uri, addr);
         if let Ok(raw_stream) = TcpStream::connect(addr) {
+            raw_stream.set_nonblocking(true);
             if let Ok(stream) = wrap_stream(raw_stream, domain, mode) {
                 return Ok(stream);
             }
